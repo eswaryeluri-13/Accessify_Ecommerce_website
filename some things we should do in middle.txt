@@ -1,0 +1,19 @@
+React js
+json web token
+express js
+mongo db atlas 
+Multer - is a node. js middleware for handling multipart/form-data , which is primarily used for uploading files.
+cors - we can add the permission to our application to access the packet
+
+
+it shows :
+package name: (backend)
+version: (1.0.0)
+description:
+entry point: (index.js)
+
+press enter for all , dont press anything just enter thats it , and at last it asks:
+Is this OK? (yes), click enter
+
+Install Thunder Client extension in vscode
+

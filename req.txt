@@ -1,0 +1,20 @@
+req:
+
+for frontend:
+npx create-react-app 
+npm install react-router-dom
+npm start
+
+for backend:
+npm init
+npm install
+npm install jsonwebtoken
+npm install mongoose
+npm install multer 
+npm install cors
+
+for admin:
+npm create vite@latest .
+npm install
+npm install react-router-dom
+npm run dev

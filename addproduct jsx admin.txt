@@ -1,0 +1,511 @@
+import React, { useState } from 'react'
+import './AddProduct.css'
+import upload_area from '../../assets/upload_area.svg'
+
+const AddProduct = () => {
+
+   const[image,setImage]=useState(false);
+   const[productDetails,setProductDetails]=useState({
+    name:"",
+    image :"",
+    category : "women",
+    new_price : "",
+    old_price :""
+   })
+
+   const imageHandler=(e)=>{
+    setImage(e.target.files[0]);/*Image will be added in Image state*/
+   }
+
+   const changeHandler=(e)=>{
+    setProductDetails({...productDetails,[e.target.name]:e.target.value})
+   }
+
+  
+   const Add_Product=async()=>
+   {
+    console.log(productDetails);
+    let responseData;
+    let product=productDetails;
+
+    let formData = new FormData();
+    formData.append('product',image);
+    
+
+    await fetch('http://localhost:4000/upload',{
+      method:'POST',
+      headers:{
+        Accept:'application/json',
+      },
+      body:formData,
+
+    }).then((resp)=> resp.json()).then((data)=>{responseData=data});
+
+    if(responseData.success)
+   {
+     product.image = responseData.image_url;
+     console.log(product);
+    
+     await fetch('http://localhost:4000/addproduct',{
+      method:'POST',
+      headers:{
+        Accept:'application/json',
+        'Content-Type':'application/json',
+      },
+      body:JSON.stringify(product),
+     }).then((resp)=>resp.json()).then((data)=>{
+      data.success?alert("Product Added"):alert("Failed")
+     })
+   }
+   }   
+   
+
+  return (
+    <div className='add-product'>
+      <div className='addproduct-itemfield'>
+        <p>Product Title</p>
+        <input value={productDetails.name} onChange={changeHandler} type="text" name='name' placeholder='Type Here' />
+      </div>
+      <div className='addproduct-price'>
+      <div className='addproduct-itemfield'>
+        <p>Price</p>
+        <input value={productDetails.old_price} onChange={changeHandler} type="text" name='old_price' placeholder='Type Here' />
+      </div>
+      <div className='addproduct-itemfield'>
+        <p>Offer Price</p>
+        <input value={productDetails.new_price} onChange={changeHandler} type="text" name='new_price' placeholder='Type Here' />
+      </div>
+     </div>
+     <div className='addproduct-itemfield'>
+        <p>Product Category</p>
+        <select value={productDetails.category} onChange={changeHandler}name="category" className='add-product-selector'>
+          <option value="women">Women</option>
+          <option value="men">men</option>
+          <option value="kid">kids</option>
+        </select>
+      </div>
+        <div className="addproduct-itemfield">
+          <label htmlFor="file-input">
+            <img src={image?URL.createObjectURL(image):upload_area} className='addproduct-thumbnail-img' alt=""></img>
+          </label>
+          <input onChange={imageHandler} type="file" name="image" id="file-input" hidden/>
+        </div>
+      <button onClick={()=>{Add_Product()}} className='addproduct-btn'>ADD</button>
+    </div>
+  )
+}
+
+export default AddProduct
+
+
+
+
+
+
+
+
+
+
+
+
+
+list 
+
+
+import React from 'react'
+import './ListProduct.css'
+import { useEffect,useState } from 'react'
+import cross_icon from '../../assets/cross_icon.png'
+
+
+const ListProduct = () => {
+
+   
+  const[allproducts,setAllProducts]=useState([]);
+  const fetchInfo=async()=>{
+    await fetch('http://localhost:4000/allproducts').then((res)=>res.json()).then((data)=>{setAllProducts(data)});
+  }
+  
+  useEffect(()=>{
+    fetchInfo();
+  },[])/*[] is kept to run it only once*/
+
+  
+  const remove_product = async(id)=>{
+    await fetch('http://localhost:4000/removeproduct',{
+      method:'POST',
+      headers:{
+        Accept:'application/json',
+        'Content-Type':'application/json',
+      },
+      body:JSON.stringify({id:id})
+    
+    })
+    await fetchInfo();
+  }
+
+
+  return (
+    <div className='list-product'>
+         <h1>All Products List</h1>
+         <div className="listproduct-format-main">
+          <p>Products</p>
+          <p>Title</p>
+          <p>Old price</p>
+          <p>New Price</p>
+          <p>Category</p>
+          <p>Remove</p>
+         </div>
+         <div className="listproduct-allproducts">
+          <hr/>
+             {allproducts.map((product,index)=>{
+               return <><div key ={index} className="listproduct-format-main listproduct-format">
+                 <img src={product.image} alt="" className="listproduct-product-icon" />
+                 <p>{product.name}</p>
+                 <p>${product.old_price}</p>
+                 <p>${product.new_price}</p>
+                 <p>{product.category}</p>
+                 <img onClick={()=>{remove_product(product.id)}} src={cross_icon} alt="" className='listproduct-remove-icon' />
+               </div>
+               <hr/>
+               </>
+             })}
+         </div>
+    </div>
+  )
+}
+
+export default ListProduct
+
+
+
+
+
+
+
+
+
+
+index.js
+
+
+
+const port = 4000;
+const express = require("express");//
+const app = express();
+const mongoose=require("mongoose");//databse
+const jwt=require("jsonwebtoken");//generate token and verify it
+const multer=require("multer");//image storage system 
+const path=require("path"); /*access to backend directory in our expressapp*/
+const cors=require("cors");//provide access to react project 
+
+app.use(express.json());/*connect to 4000 port,requests are passed using json method*/
+app.use(cors());//access to frontend and connect with backend
+
+// Database Connection with MongoDB 
+//mongoose.connect("mongodb+srv://eswaryeluri13:pawankalya2@cluster0.lt7idgj.mongodb.net/ecomm")
+mongoose.connect("mongodb+srv://eswaryeluri13:pawankalya2@cluster0.lt7idgj.mongodb.net")
+//API connection
+
+app.get("/",(req,res)=>{
+    res.send("Express App is running")
+})
+
+
+// Image Storage Engine
+
+const storage=multer.diskStorage({
+    destination:'./upload/images',
+    filename:(req,file,cb)=>{
+        return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+    }
+})
+
+const upload =multer({
+    storage:storage
+})
+
+
+
+// creating Upload Endpoint for images,user can acces the image
+app.use('/images',express.static('upload/images'))
+
+app.post("/upload",upload.single('product'),(req,res)=>{
+     res.json({
+        success:1,
+        image_url:`http://localhost:${port}/images/${req.file.filename}`
+     })
+})
+
+// Schema for Creating Products
+
+const Product=mongoose.model("Product",{
+    id:{
+        type:Number,
+        required:true,
+    },
+    name:{
+        type:String,
+        required:true,
+    },
+    image:{
+        type:String,
+        required:true,
+    },
+    category:{
+        type:String,
+        required:true,
+    },
+    new_price:{
+        type:Number,
+        required:true,
+    },
+    old_price:{
+        type:Number,
+        required:true,
+    },
+    date:{
+        type:Date,
+        default:Date.now,
+    },
+    available:{
+        type:Boolean,
+        default:true,
+    }
+
+})
+
+app.post('/addproduct',async(req,res)=>{
+    try
+    {let products= await Product.find({}).maxTimeMS(30000);
+    let id;
+    if(products.length>0)
+    {
+        let last_product_array = products.slice(-1);
+        let last_product = last_product_array[0];
+        id=last_product.id+1;
+    }
+    else{
+        id:1;
+    }
+      const product = new Product({
+        id:id,
+        name:req.body.name,
+        category:req.body.category,
+        new_price: req.body.new_price,
+        old_price: req.body.old_price,
+        image:req.body.image,
+        
+      });
+      console.log(product);
+      await product.save();       //as database takes some time to upload , we use this
+      console.log("Saved");
+      res.json({
+        success:true,
+        name:req.body.name,
+      });
+    }catch (error) {
+        console.error(error);
+        res.status(500).json({
+          success: false,
+          error: 'Internal Server Error',
+        });
+      }
+    });
+
+
+// Creating API for deleting Products
+
+/*app.post('/removeproduct',async(req,res)=>{
+    await Product.findOneAndDelete({id:req.body.id});
+    console.log("Removed");
+    res.json({
+        success:true,
+        name:req.body.name
+    })
+})*/
+
+// Creating API for getting all products
+app.get('/allproducts',async(req,res)=>{
+    let products = await Product.find({});
+    console.log("All Products fetched");
+    res.send(products);
+})
+
+//creating User model 
+
+const Users=mongoose.model('Users',{
+    name:{
+        type:String,
+    },
+    email:{
+        type:String,
+        unique:true,
+    },
+    password:{
+        type:String,
+    },
+    cartData:{
+        type:Object,
+    },
+    date:{
+        type:Date,
+        default:Date.now,
+    }
+})
+
+//Creating endpoint for the user
+
+app.post('/signup',async(req,res)=>{
+    let check = await Users.findOne({email:req.body.email});
+    if(check)
+    {
+        return res.status(400).json({success:false,errors:"existing user found with same email"})
+    }
+    let cart = {};
+    for (let i = 0; i < 300; i++) {
+        cart[i]=0;        
+    }
+    const user = new Users({
+        name:req.body.username,
+        email:req.body.email,
+        password:req.body.password,
+        cartData:cart,
+    })
+
+    await user.save();
+
+    const data={
+        user:{
+            id:user.id
+        }
+    }
+    
+    const token =jwt.sign(data,'secret_ecom');// when we use this salt , our data will be encrypted by one layer
+    res.json({success:true,token})
+
+/*Secret:
+
+In the context of cryptographic practices, a "secret" is typically a key, passphrase, or any piece of information kept confidential to ensure the security of cryptographic operations. 
+In the provided code snippet, 'secret_ecom' is used as a secret key to sign the JSON Web Token (JWT).
+
+Salt:
+
+A "salt" is a random value that is used as an additional input to a one-way function (like a hash function) during the process of hashing passwords.
+ The purpose of a salt is to prevent attackers from using precomputed tables (rainbow tables) to efficiently crack passwords.
+ Salting is commonly used in password storage to enhance security.*/
+
+})   
+
+//creating endpoint fro user login 
+app.post('/login',async(req,res)=>{
+    let user=await Users.findOne({email:req.body.email});
+    if(user)
+    {
+        const passCompare = req.body.password === user.password;
+        if (passCompare)
+        {
+            const data = {
+                user:{
+                    id:user.id
+                }
+            }
+            const token=jwt.sign(data,'secret_ecom');
+            res.json({success:true,token});
+        }
+        else{
+            res.json({success:false,errors:"Wrong Password"});
+        }
+    }
+    else{
+        res.json({success:false,errors:"Wrong Email ID"});
+    }
+})
+
+// creating endpoint for newcollection data
+/*app.get('/newcollections',async(req,res)=>{
+    let products= await Product.find({});
+    let newcollection= products.slice(1).slice(-8);
+    console.log("NewCollection Fetched");
+    res.send(newcollection);
+})
+
+app.get('/popularinwomen',async(req,res)=>{
+      let products = await Product.find({category:"women"});
+      let popular_in_women= products.slice(0,4);
+      console.log("Popular in women fetched");
+      res.send(popular_in_women);
+})*/
+
+// creating middleware to fetch user
+
+ const fetchUser=async(req,res,next)=>{
+       const token = req.header('auth-token');
+       if(!token){
+        res.status(401).send({errors:"Please authenticate using valid token"})
+       }
+       else{
+        try{
+             const data=jwt.verify(token,'secret_ecom');
+            req.user=data.user;
+            next();
+        }
+        catch(error)
+        {
+            req.status(401).send({errors:"Please authenticate using valid token"})
+        }
+       }
+ }
+
+app.post('/addtocart',fetchUser,async(req,res)=>{
+    console.log("Added",req.body.itemId);
+    let userData=await Users.findOne({_id:req.user.id});
+    userData.cartData[req.body.itemId]+=1;
+    await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cart});
+    res.send("Added")
+    //console.log(req.body,req.user);
+})
+
+
+//creating endpoint to remove product from cartdata
+/*app.post('/removefromcart',fetchUser,async(req,res)=>{
+    console.log("removed",req.body.itemId);
+    let userData=await Users.findOne({_id:req.user.id});
+    if(userData.cartData[req.body.itemId]>0)
+    userData.cartData[req.body.itemId]-=1;
+    await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cart});
+    res.send("Removed")
+})*/
+
+//creating endpoint to get cartdata 
+app.post('/getcart',fetchUser,async(req,res)=>{
+    console.log("GetCart");
+    let userData = await Users.findOne({_id:req.user.id})
+    res.json(userData.cartData);
+})
+
+
+app.listen(port,(error)=>{
+    if(!error)
+    {
+        console.log("Server Running on Port "+port)
+    }
+    else{
+        console.log("Error : "+error)
+    }
+})
+//express server will be started
+
+
+
+
+
+
+
+
+
+
+
+
+
+
