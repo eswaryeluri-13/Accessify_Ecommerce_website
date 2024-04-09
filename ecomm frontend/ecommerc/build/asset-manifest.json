@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/static/css/main.59db047a.css",
+    "main.js": "/static/js/main.073e27f0.js",
+    "static/js/592.87d89b41.chunk.js": "/static/js/592.87d89b41.chunk.js",
+    "static/media/banner_kids.png": "/static/media/banner_kids.fff815a581793a7380fb.png",
+    "static/media/banner_women.png": "/static/media/banner_women.5a27fc4e4533e57e4676.png",
+    "static/media/banner_mens.png": "/static/media/banner_mens.eed7197157196f319b17.png",
+    "static/media/hero_image.png": "/static/media/hero_image.09ff1c4114792a6143c2.png",
+    "static/media/exclusive_image.png": "/static/media/exclusive_image.e8118f2149d9cb916980.png",
+    "static/media/product_4.png": "/static/media/product_4.ea0420ca9cec08d6df05.png",
+    "static/media/product_2.png": "/static/media/product_2.d4e74f367160ec10fb34.png",
+    "static/media/product_1.png": "/static/media/product_1.5a757396ee7ff5dd91c1.png",
+    "static/media/product_3.png": "/static/media/product_3.be48863df18b272b8f59.png",
+    "static/media/hand_icon.png": "/static/media/hand_icon.9c7487cecb600f30901b.png",
+    "index.html": "/index.html",
+    "main.59db047a.css.map": "/static/css/main.59db047a.css.map",
+    "main.073e27f0.js.map": "/static/js/main.073e27f0.js.map",
+    "592.87d89b41.chunk.js.map": "/static/js/592.87d89b41.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.59db047a.css",
+    "static/js/main.073e27f0.js"
+  ]
+}
