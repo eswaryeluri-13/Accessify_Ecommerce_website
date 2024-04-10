@@ -1,4 +1,5 @@
 const port = 4000;
+//const http = require("http");
 const express = require("express"); //
 const app = express();
 const mongoose = require("mongoose"); //databse
@@ -6,14 +7,16 @@ const jwt = require("jsonwebtoken"); //generate token and verify it
 const multer = require("multer"); //image storage system
 const path = require("path"); /*access to backend directory in our expressapp*/
 const cors = require("cors"); //provide access to react project
+//const server = http.createServer(app);
 
 app.use(
   express.json()
 ); /*connect to 4000 port,requests are passed using json method*/
--app.use(express.urlencoded({ extended: false }));
+
 app.use(
   cors({
-    origin: ["http:localhost:4000", "https://Accessify.onrender.com"],
+    origin: "https://eswaryeluri.netlify.app/",
+    credentials: true,
   })
 ); //access to frontend and connect with backend
 
