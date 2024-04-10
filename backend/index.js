@@ -15,7 +15,7 @@ app.use(
 
 app.use(
   cors({
-    origin: "https://eswaryeluri.netlify.app/",
+    origin: ["http://localhost:5173", "https://eswaryeluri.netlify.app"],
     credentials: true,
   })
 ); //access to frontend and connect with backend
