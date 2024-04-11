@@ -22,7 +22,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   margin-top: 50px;
-  margin-left: 70px;
+  margin-left: 20px;
   gap: 20px;
 }
 
